@@ -9,7 +9,7 @@ public:
         }
         vector<vector<string>> groups;
         for(auto e : freq) {
-            groups.push_back(e.second);
+            groups.push_back(std::move(e.second));
         }
         return groups;
     }
