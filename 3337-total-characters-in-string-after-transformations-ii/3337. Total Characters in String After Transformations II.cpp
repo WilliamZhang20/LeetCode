@@ -1,31 +1,32 @@
-static constexpr int L = 26;
-static constexpr int mod = 1000000007;
+static constexpr int L = 26; // # letters
+static constexpr int mod = 1e9+7;
 
-struct Mat {
-    Mat() { memset(a, 0, sizeof(a)); }
-    Mat(const Mat& that) {
-        for (int i = 0; i < L; ++i) {
-            for (int j = 0; j < L; ++j) {
-                a[i][j] = that.a[i][j];
+struct Matrix {
+    int a[L][L];
+    Matrix() {
+        memset(a, 0, sizeof(a));
+    }
+    Matrix(const Matrix& rhs) {
+        for(int i=0; i<L; i++) {
+            for(int j = 0; j < L; ++j) {
+                a[i][j] = rhs.a[i][j];
             }
         }
     }
-    Mat& operator=(const Mat& that) {
-        if (this != &that) {
-            for (int i = 0; i < L; ++i) {
-                for (int j = 0; j < L; ++j) {
-                    a[i][j] = that.a[i][j];
+    Matrix& operator=(const Matrix& rhs) {
+        if(this != &rhs) {
+            for(int i=0; i<L; i++) {
+                for(int j = 0; j < L; ++j) {
+                    a[i][j] = rhs.a[i][j];
                 }
             }
         }
         return *this;
     }
-
-    int a[L][L];
 };
 
-Mat operator*(const Mat& u, const Mat& v) {
-    Mat w;
+Matrix operator*(const Matrix& u, const Matrix& v) {
+    Matrix w;
     for (int i = 0; i < L; ++i) {
         for (int j = 0; j < L; ++j) {
             for (int k = 0; k < L; ++k) {
@@ -38,8 +39,8 @@ Mat operator*(const Mat& u, const Mat& v) {
 }
 
 // identity matrix
-Mat I() {
-    Mat w;
+Matrix I() {
+    Matrix w;
     for (int i = 0; i < L; ++i) {
         w.a[i][i] = 1;
     }
@@ -47,10 +48,10 @@ Mat I() {
 }
 
 // matrix exponentiation by squaring
-Mat quickmul(const Mat& x, int y) {
-    Mat ans = I(), cur = x;
-    while (y) {
-        if (y & 1) {
+Matrix quickmul(const Matrix& x, int y) {
+    Matrix ans = I(), cur = x;
+    while(y) {
+        if(y & 1) {
             ans = ans * cur;
         }
         cur = cur * cur;
@@ -62,20 +63,20 @@ Mat quickmul(const Mat& x, int y) {
 class Solution {
 public:
     int lengthAfterTransformations(string s, int t, vector<int>& nums) {
-        Mat T;
-        for (int i = 0; i < 26; ++i) {
-            for (int j = 1; j <= nums[i]; ++j) {
+        Matrix T;
+        for(int i=0; i<26; ++i) {
+            for(int j=1; j<=nums[i]; ++j) {
                 T.a[(i + j) % 26][i] = 1;
             }
         }
-        Mat res = quickmul(T, t);
+        Matrix res = quickmul(T, t); // calculate t'th power
         int ans = 0;
         vector<int> f(26);
-        for (char ch : s) {
+        for(char ch : s) {
             ++f[ch - 'a'];
         }
-        for (int i = 0; i < 26; ++i) {
-            for (int j = 0; j < 26; ++j) {
+        for(int i=0; i<26; ++i) {
+            for(int j=0; j<26; ++j) {
                 ans = (ans + (long long)res.a[i][j] * f[j]) % mod;
             }
         }
