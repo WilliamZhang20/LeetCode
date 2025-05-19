@@ -1,34 +1,36 @@
+// leetcode 399
 class Solution {
-    unordered_map<string, vector<pair<string, double>>> graph;
 public:
-    double dfs(double val, string src, string dest, unordered_map<string, bool>& vis) {
-        vis[src] = true;
-        double ret;
-        std::cout << src << " " << dest << " " << val << "\n";
-        for(int i=0; i<graph[src].size(); i++) {
-            if(graph[src][i].first == dest) {
-                return val * graph[src][i].second;
-            }
-            else if(!vis[graph[src][i].first]) {
-                ret = dfs(graph[src][i].second * val, graph[src][i].first, dest, vis);
-                if(ret != -1) {
-                    return ret;
-                }
-            }
-        }
-        return -1;
-    }
     vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+        vector<double> result;
         for(int i=0; i<equations.size(); i++) {
             graph[equations[i][0]].push_back({equations[i][1], values[i]});
             graph[equations[i][1]].push_back({equations[i][0], 1/values[i]});
         }
-        vector<double> result;
         for(int i=0; i<queries.size(); i++) {
-            unordered_map<string, bool> vis;
-            double val = 1;
-            result.push_back(dfs(val, queries[i][0], queries[i][1], vis));
-        }   
+            // search for division
+            result.push_back(dfs(queries[i][0], queries[i][1]));
+            visited.clear();
+        }
         return result;
+    }
+private:
+    unordered_map<string, vector<pair<string, double>>> graph; // adjacency list
+    unordered_set<string> visited;
+    double dfs(std::string source, std::string destination) {
+        if(graph[source].size() != 0 && source == destination) {
+            return 1;
+        }
+        visited.insert(source);
+        for(int i=0; i<graph[source].size(); i++) {
+            if(visited.count(graph[source][i].first)) {
+                continue;
+            }
+            double result = dfs(graph[source][i].first, destination);
+            if(result != -1) {
+                return result*graph[source][i].second;
+            }
+        }
+        return -1;
     }
 };
