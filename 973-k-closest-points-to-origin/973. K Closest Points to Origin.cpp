@@ -5,7 +5,6 @@ public:
         priority_queue<pair<double, int>, vector<pair<double, int>>> pq; // min pq
         for(int i=0; i<points.size(); i++) {
             double dist = sqrt(pow(points[i][0], 2) + pow(points[i][1], 2));
-            cout << dist << endl;
             pq.push({dist, i});
             if(pq.size() > k) {
                 pq.pop();
