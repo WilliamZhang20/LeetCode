@@ -10,45 +10,33 @@
  * };
  */
 class Solution {
-    int findMax(TreeNode* root) {
-        if(!root) {
-            return INT_MIN;
-        }
-        return max({root->val, findMax(root->left), findMax(root->right)});
-    }
-    int findMin(TreeNode* root) {
-        if(!root) {
-            return INT_MAX;
-        }
-        return min({root->val, findMin(root->left), findMin(root->right)});
-    }
-    bool isValidBST(TreeNode* root) {
-        if(!root) {
-            return true;
-        }
-        int leftMax = findMax(root->left);
-        int rightMin = findMin(root->right);
-        if(leftMax >= root->val || rightMin <= root->val) {
-            return false;
-        }
-        if(isValidBST(root->left) && isValidBST(root->right)) {
-            return true;
-        }
-        return false;
-    }
+    TreeNode* prev = NULL;
+public:
     int countNodes(TreeNode* root) {
         if(!root) {
             return 0;
         }
         return 1 + countNodes(root->left) + countNodes(root->right);
     }
-public:
+    bool inOrderSorted(TreeNode* root) {
+        if(!root) {
+            return true;
+        }
+        if(!inOrderSorted(root->left)) {
+            return false;
+        }
+        if(prev && prev->val >= root->val) {
+            return false;
+        }
+        prev = root;
+        return inOrderSorted(root->right);
+    }
     int largestBSTSubtree(TreeNode* root) {
         if(!root) {
             return 0;
         }
-        if(isValidBST(root)) {
-            std::cout << root->val << " valid\n";
+        prev = NULL;
+        if(inOrderSorted(root)) {
             return countNodes(root);
         }
         return max(largestBSTSubtree(root->left), largestBSTSubtree(root->right));
