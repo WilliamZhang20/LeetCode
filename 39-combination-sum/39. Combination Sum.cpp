@@ -1,5 +1,5 @@
 class Solution {
-    void explore(vector<int>& candidates, int& target, vector<vector<int>>& ans, vector<int> curr, int idx, int sum) {
+    void explore(vector<int>& candidates, int& target, vector<vector<int>>& ans, vector<int>& curr, int idx, int sum) {
         if (sum == target) {
             ans.push_back(curr);
             return;
