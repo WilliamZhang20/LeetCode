@@ -1,26 +1,23 @@
 class Solution {
+    void explore(vector<int>& candidates, int& target, vector<vector<int>>& ans, vector<int> curr, int idx, int sum) {
+        if (sum == target) {
+            ans.push_back(curr);
+            return;
+        }
+        if(sum > target || idx == candidates.size()) {
+            return;
+        }
+        curr.push_back(candidates[idx]);
+        explore(candidates, target, ans, curr, idx, sum + candidates[idx]);
+        curr.pop_back();
+        explore(candidates, target, ans, curr, idx+1, sum);
+    }
 public:
     vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        vector<vector<int>> ans;
+        vector<int> curr;
         sort(candidates.begin(), candidates.end());
-        vector<vector<int>> result;
-        vector<int> soln;
-        findSolns(candidates, target, 0, soln, 0, result);
-        return result;
-    }
-private:
-    void findSolns(vector<int>& candidates, int target, int idx, vector<int>& soln, int buildup, vector<vector<int>>& res) {
-        if(buildup == target) {
-            res.push_back(soln);
-            return;
-        }
-        if(buildup > target || idx == candidates.size()) {
-            return;
-        }
-        // include
-        soln.push_back(candidates[idx]);
-        findSolns(candidates, target, idx, soln, buildup + candidates[idx], res);
-        soln.pop_back();
-        // or not include
-        findSolns(candidates, target, idx+1, soln, buildup, res);
+        explore(candidates, target, ans, curr, 0, 0);
+        return ans;
     }
 };
