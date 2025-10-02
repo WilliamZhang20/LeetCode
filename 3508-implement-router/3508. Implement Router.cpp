@@ -23,7 +23,7 @@ auto tuple_to_vector_as(const Tuple& tup) -> std::vector<Target> {
 
 class Router {
     std::unordered_set<Key, tuple_hash> check;  // To track existing (source, destination, timestamp) triplets
-    std::unordered_map<int, std::deque<int>> sameDestQ; // Stores (destination -> sorted timestamps)
+    std::unordered_map<int, std::deque<int>> sameDestQ;
     std::deque<Key> q; // Stores (source, destination, timestamp) for forwarding
     int capacity;
     int sz;
@@ -39,13 +39,18 @@ public:
             return false;
         }
         if (sz == capacity) {
-            forwardPacket();
+            Key val = q.front();
+            q.pop_front();
+            check.erase(val); 
+            --sz;
+            
+            sameDestQ[std::get<1>(val)].pop_front();
         }
 
         // Add the new packet to the router's structures
         check.emplace(source, destination, timestamp);
         q.emplace_back(source, destination, timestamp);
-        sameDestQ[destination].push_back(timestamp); // Maintain timestamps sorted in multiset
+        sameDestQ[destination].push_back(timestamp);
         sz++;
         return true;
     }
@@ -58,10 +63,9 @@ public:
         // Forward the first packet in the queue (FIFO)
         Key val = q.front();
         q.pop_front();
-        check.erase(val); // Remove from check to mark it as forwarded
+        check.erase(val); 
         --sz;
         
-        // Remove the timestamp from the sorted multiset
         sameDestQ[std::get<1>(val)].pop_front();
         
         return tuple_to_vector_as<int>(val);
