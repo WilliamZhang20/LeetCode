@@ -3,19 +3,21 @@ public:
     bool isMatch(string s, string p) {
         int n = s.size();
         int m = p.size();
-        vector<vector<bool>> dp(n + 1, vector<bool>(m + 1, false));
-        dp[n][m] = true;
-        for(int i=n; i >= 0; i--) {
-            for(int j=m-1; j >= 0; j--) {
+        vector<bool> next(m + 1, false), curr(m + 1, false);
+        next[m] = true;
+        for (int i = n; i >= 0; --i) {
+            curr[m] = (i == n);
+            for (int j = m - 1; j >= 0; --j) {
                 bool match = (i < n) && (p[j] == s[i] || p[j] == '.');
-                if(j + 1 < m && p[j+1] == '*') {
-                    dp[i][j] = dp[i][j + 2] || (match && dp[i + 1][j]);
-                }
-                else {
-                    dp[i][j] = match && dp[i+1][j+1];
+                if (j + 1 < m && p[j + 1] == '*') {
+                    curr[j] = next[j] && match || curr[j + 2];
+                } else {
+                    curr[j] = match && next[j + 1];
                 }
             }
+            next = curr; // move to next row
         }
-        return dp[0][0];
+
+        return next[0];
     }
 };
