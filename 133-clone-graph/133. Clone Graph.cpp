@@ -20,24 +20,26 @@ public:
 */
 
 class Solution {
-    unordered_map<Node*, Node*> track;
 public:
-    Node* searchGraph(Node* node) {
-        Node* ret = new Node(node->val);
-        track[node] = ret;
-        for(int i=0; i<node->neighbors.size(); i++) {
-            if(!track[node->neighbors[i]]) {
-                ret->neighbors.push_back(searchGraph(node->neighbors[i]));
-            } else {
-                ret->neighbors.push_back(track[node->neighbors[i]]);
+    Node* cloneGraph(Node* node) {
+        if (!node) return nullptr;
+        unordered_map<Node*, Node*> track;
+        queue<Node*> q;
+        q.push(node);
+        track[node] = new Node(node->val);
+        
+        while (!q.empty()) {
+            Node* n = q.front();
+            q.pop();
+            Node* clone = track[n];
+            for (Node* neighbor : n->neighbors) {
+                if (!track.count(neighbor)) {
+                    track[neighbor] = new Node(neighbor->val);
+                    q.push(neighbor);
+                }
+                clone->neighbors.push_back(track[neighbor]);
             }
         }
-        return ret;
-    }
-    Node* cloneGraph(Node* node) {
-        if(!node) {
-            return nullptr;
-        }
-        return searchGraph(node);
+        return track[node];
     }
 };
