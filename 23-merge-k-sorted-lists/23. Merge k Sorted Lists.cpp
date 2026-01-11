@@ -9,19 +9,16 @@
  * };
  */
 class Solution {
-    struct Compare {
-        bool operator()(ListNode* a, ListNode* b) {
-            return a->val > b->val;  // min-heap
-        }
-    };
 public:
     ListNode* mergeKLists(vector<ListNode*>& lists) {
-        ListNode* dummy = new ListNode(0);
-        ListNode* curr = dummy; 
-        if(lists.size() == 0) {
-            return nullptr;
-        }
-        priority_queue<ListNode*, vector<ListNode*>, Compare> pq;
+        ListNode dummy(0);
+        ListNode* curr = &dummy;
+        auto cmp = [](ListNode* a, ListNode* b) {
+            return a->val > b->val;
+        };
+        vector<ListNode*> heap;
+        heap.reserve(lists.size());
+        priority_queue<ListNode*, vector<ListNode*>, decltype(cmp)> pq(cmp, move(heap));
         for(int i=0; i<lists.size(); i++) {
             if(lists[i]) {
                 pq.push(lists[i]);
@@ -36,6 +33,6 @@ public:
             curr->next = min;
             curr = curr->next;
         }
-        return dummy->next;
+        return dummy.next;
     }
 };
