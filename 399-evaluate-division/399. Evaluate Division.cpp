@@ -1,36 +1,55 @@
-// leetcode 399
 class Solution {
 public:
-    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
-        vector<double> result;
-        for(int i=0; i<equations.size(); i++) {
-            graph[equations[i][0]].push_back({equations[i][1], values[i]});
-            graph[equations[i][1]].push_back({equations[i][0], 1/values[i]});
+    unordered_map<string, string> parent;
+    unordered_map<string, double> weight;
+
+    pair<string, double> find(string i) {
+        if(parent.find(i) == parent.end()) {
+            parent[i] = i;
+            weight[i] = 1.0;
+            return {i, 1.0};
         }
-        for(int i=0; i<queries.size(); i++) {
-            // search for division
-            result.push_back(dfs(queries[i][0], queries[i][1]));
-            visited.clear();
-        }
-        return result;
+        if(parent[i] == i) return {i, 1.0};
+
+        pair<string, double> res = find(parent[i]);
+        parent[i] = res.first;
+        weight[i] *= res.second;
+        return {parent[i], weight[i]};
     }
-private:
-    unordered_map<string, vector<pair<string, double>>> graph; // adjacency list
-    unordered_set<string> visited;
-    double dfs(std::string source, std::string destination) {
-        if(graph[source].size() != 0 && source == destination) {
-            return 1;
+
+    void unite(string i, string j, double d) {
+        // merge two sets
+        pair<string, double> root1 = find(i);
+        pair<string, double> root2 = find(j);
+
+        if(root1.first != root2.first) {
+            parent[root1.first] = root2.first;
+            weight[root1.first] = (d * root2.second) / root1.second;
         }
-        visited.insert(source);
-        for(int i=0; i<graph[source].size(); i++) {
-            if(visited.count(graph[source][i].first)) {
-                continue;
-            }
-            double result = dfs(graph[source][i].first, destination);
-            if(result != -1) {
-                return result*graph[source][i].second;
+    }
+    
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+        for (int i = 0; i < equations.size(); i++) {
+            unite(equations[i][0], equations[i][1], values[i]);
+        }
+        vector<double> res;
+        for(auto& q : queries) {
+            string var1 = q[0], var2 = q[1];
+
+            if (parent.find(var1) == parent.end() || parent.find(var2) == parent.end()) {
+                res.push_back(-1.0);
+            } else {
+                pair<string, double> res1 = find(var1);
+                pair<string, double> res2 = find(var2);
+
+                if(res1.first != res2.first) {
+                    res.push_back(-1.0); // different parents, can't figure it out
+                }
+                else {
+                    res.push_back(res1.second / res2.second);
+                }
             }
         }
-        return -1;
+        return res;
     }
 };
