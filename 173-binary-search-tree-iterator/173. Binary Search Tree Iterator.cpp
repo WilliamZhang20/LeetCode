@@ -10,28 +10,30 @@
  * };
  */
 class BSTIterator {
-    vector<int> v;
-    int i = 0;
-
-    void dfs(TreeNode* n) {
-        if (!n) return;
-        dfs(n->left);
-        v.push_back(n->val);
-        dfs(n->right);
-    }
-
 public:
+    int idx = 0;
+    vector<TreeNode*>ans;
+    void inorder(TreeNode* root , vector<TreeNode*>&arr){
+        if(root==NULL)return ;
+        inorder(root->left,arr);
+        arr.push_back(root);
+        inorder(root->right,arr);
+    }
     BSTIterator(TreeNode* root) {
-        v.reserve(100000);
-        dfs(root);
+        vector<TreeNode*>arr;
+        idx = 0;
+        inorder(root,arr);
+        ans = arr;
     }
-
-    int next() {
-        return v[i++];
+    
+    int next(){
+        int x = ans[idx]->val;
+        idx++;
+        return x;
     }
-
     bool hasNext() {
-        return i < v.size();
+     if(idx<ans.size())return true;
+     return false;
     }
 };
 
