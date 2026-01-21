@@ -1,60 +1,94 @@
-static const int _ = []() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    return 0;
-}();
-class LFUCache {
-    int capacity;
-    int minFreq;
-    // key -> {value, freq, iterator into freq list}
-    unordered_map<int, pair<int, pair<int, list<int>::iterator>>> keyMap;
+struct Node {
+    int key, val, freq;
+    Node *prev, *next;
+    Node() : key(-1), val(-1), freq(0), prev(nullptr), next(nullptr) {}
+    Node(int k, int v, int f) : key(k), val(v), freq(f), prev(nullptr), next(nullptr) {}
+};
 
-    // freq -> list of keys (LRU order within same freq)
-    unordered_map<int, list<int>> freqMap;
-public:
-    LFUCache(int capacity) : capacity(capacity), minFreq(0) {}
+struct List {
+    Node *head, *tail;
+    int size;
+    List() {
+        head = new Node();
+        tail = new Node();
+        head->next = tail;
+        tail->prev = head;
+        size = 0;
+    }
     
-    int get(int key) {
-        auto it = keyMap.find(key);
-        if(it == keyMap.end()) return -1;
+    void addFront(Node* node) {
+        node->next = head->next;
+        node->prev = head;
+        head->next->prev = node;
+        head->next = node;
+        size++;
+    }
+    
+    void remove(Node* node) {
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+        size--;
+    }
+    
+    bool isEmpty() { return size == 0; }
+};
 
-        int value = it->second.first;
-        int& freq = it->second.second.first;
-        auto iter = it->second.second.second;
-        freqMap[freq].erase(iter);
-        if (freq == minFreq && freqMap[freq].empty()) {
+class LFUCache {
+    int capacity, minFreq, count;
+    unordered_map<int, Node*> keyMap;
+    unordered_map<int, List*> freqMap;
+
+    void updateFreq(Node* node) {
+        int f = node->freq;
+        freqMap[f]->remove(node);
+        if (f == minFreq && freqMap[f]->isEmpty()) {
             minFreq++;
         }
-        freq++;
-        freqMap[freq].emplace_front(key);
-        it->second.second.second = freqMap[freq].begin();
-        return value;
+        node->freq++;
+        if (freqMap.find(node->freq) == freqMap.end()) {
+            freqMap[node->freq] = new List();
+        }
+        freqMap[node->freq]->addFront(node);
+    }
+
+public:
+    LFUCache(int capacity) : capacity(capacity), minFreq(0), count(0) {
+        keyMap.reserve(capacity); // Optimization: prevent rehashing
+    }
+    
+    int get(int key) {
+        if (keyMap.find(key) == keyMap.end()) return -1;
+        Node* node = keyMap[key];
+        updateFreq(node);
+        return node->val;
     }
     
     void put(int key, int value) {
-        if (capacity == 0) return;
-        auto it = keyMap.find(key);
-        if(it != keyMap.end()) {
-            it->second.first = value;
-            get(key);   // reuse correct logic
+        if (capacity <= 0) return;
+        
+        if (keyMap.find(key) != keyMap.end()) {
+            Node* node = keyMap[key];
+            node->val = value;
+            updateFreq(node);
             return;
         }
-        if (keyMap.size() == capacity) {
-            // proceed to delete a key
-            int key = freqMap[minFreq].back();
-            freqMap[minFreq].pop_back();
-            keyMap.erase(key);
+        
+        if (count == capacity) {
+            List* minList = freqMap[minFreq];
+            Node* toRemove = minList->tail->prev;
+            keyMap.erase(toRemove->key);
+            minList->remove(toRemove);
+            delete toRemove;
+            count--;
         }
-        // create new key with frequency 1
-        freqMap[1].emplace_front(key);
+        
+        Node* newNode = new Node(key, value, 1);
+        keyMap[key] = newNode;
+        if (freqMap.find(1) == freqMap.end()) {
+            freqMap[1] = new List();
+        }
+        freqMap[1]->addFront(newNode);
         minFreq = 1;
-        keyMap[key] = {value, {1, freqMap[1].begin()}};
+        count++;
     }
 };
-
-/**
- * Your LFUCache object will be instantiated and called as such:
- * LFUCache* obj = new LFUCache(capacity);
- * int param_1 = obj->get(key);
- * obj->put(key,value);
- */
