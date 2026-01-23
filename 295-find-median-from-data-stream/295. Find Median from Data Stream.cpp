@@ -3,15 +3,22 @@ public:
     priority_queue<int, vector<int>, greater<>> large;
     priority_queue<int> small;
 
-    MedianFinder() {}
+    MedianFinder() {
+        ios_base::sync_with_stdio(false);
+        cin.tie(NULL);
+    }
     
     void addNum(int num) {
-        small.push(num);
-        if(!small.empty()) {
+        if(small.empty() || num < small.top()) {
+            small.push(num);
+        } else {
+            large.push(num);
+        }
+        if(small.size() > large.size() + 1) {
             large.push(small.top());
             small.pop();
         }
-        if(large.size() > small.size()) {
+        else if(large.size() > small.size() + 1) {
             small.push(large.top());
             large.pop();
         }
