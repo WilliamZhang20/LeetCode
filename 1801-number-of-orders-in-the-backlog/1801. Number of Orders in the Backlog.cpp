@@ -1,6 +1,6 @@
 class Solution {
-public:
     static constexpr int MOD = 1e9+7;
+public:
     int getNumberOfBacklogOrders(vector<vector<int>>& orders) {
         // buy want smallest sell, sell wants largest buy
         priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> asks;
