@@ -4,14 +4,18 @@ public:
     Logger() { }
     
     bool shouldPrintMessage(int timestamp, string message) {
-        if(!pTime.contains(message)) {
-            pTime[message] = timestamp;
+        auto it = pTime.find(message);
+
+        if (it == pTime.end()) {
+            pTime.emplace(message, timestamp);
             return true;
-        }   
-        if (timestamp - pTime[message] < 10) {
+        }
+
+        if (timestamp - it->second < 10) {
             return false;
         }
-        pTime[message] = timestamp;
+
+        it->second = timestamp;
         return true;
     }
 };
