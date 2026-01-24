@@ -9,7 +9,7 @@ public:
     
     bool find(int value) {
         for(const auto& [k, v]: freq) {
-            if((value - k != k) && freq.count(value - k)) {
+            if((value - k != k) && freq.contains(value - k)) {
                 return true;
             } else if((value - k == k) && freq[k] > 1) {
                 return true;
