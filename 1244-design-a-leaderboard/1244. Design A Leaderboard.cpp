@@ -1,30 +1,29 @@
 class Leaderboard {
-    unordered_map<int, int> track;
+    unordered_map<int, int> score;
+    multiset<int> ms;
+
 public:
-    Leaderboard() {}
-    
-    void addScore(int playerId, int score) {
-        track[playerId] += score;
+    void addScore(int playerId, int s) {
+        if (score.count(playerId)) {
+            ms.erase(ms.find(score[playerId]));
+        }
+        score[playerId] += s;
+        ms.insert(score[playerId]);
     }
-    
+
     int top(int K) {
-        priority_queue<int, vector<int>, greater<int>> scores;
-        for(auto& [_, v] : track) {
-            scores.push(v);
-            if(scores.size() > K) {
-                scores.pop();
-            }
+        int sum = 0;
+        auto it = ms.rbegin();
+        while (K-- && it != ms.rend()) {
+            sum += *it;
+            ++it;
         }
-        int ans = 0;
-        while(!scores.empty()) {
-            ans += scores.top();
-            scores.pop();
-        }
-        return ans;
+        return sum;
     }
-    
+
     void reset(int playerId) {
-        track[playerId] = 0;
+        ms.erase(ms.find(score[playerId]));
+        score.erase(playerId);
     }
 };
 
