@@ -1,40 +1,55 @@
 class Solution {
-    vector<pair<int, int>> adj[101];
 public:
-    void dijkstra(vector<int>& signalRcvdAt, int source, int n) {
-        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+    void dijkstra(vector<vector<pair<int,int>>>& adj,
+                  vector<int>& signalRcvdAt,
+                  int source) {
+
+        priority_queue<pair<int,int>,
+                       vector<pair<int,int>>,
+                       greater<pair<int,int>>> pq;
+
         pq.emplace(0, source);
         signalRcvdAt[source] = 0;
-        while(!pq.empty()) {
-            int currNodetime = pq.top().first;
-            int currNode = pq.top().second;
+
+        while (!pq.empty()) {
+            auto [currTime, currNode] = pq.top();
             pq.pop();
-            if(currNodetime > signalRcvdAt[currNode]) {
+
+            if (currTime > signalRcvdAt[currNode])
                 continue;
-            }
-            for(auto& edge: adj[currNode]) {
-                int time = edge.first;
-                int neighborNode = edge.second;
-                if(signalRcvdAt[neighborNode] > currNodetime + time) {
-                    signalRcvdAt[neighborNode] = currNodetime + time;
-                    pq.emplace(signalRcvdAt[neighborNode], neighborNode);
+
+            for (auto& [time, neighbor] : adj[currNode]) {
+                if (signalRcvdAt[neighbor] > currTime + time) {
+                    signalRcvdAt[neighbor] = currTime + time;
+                    pq.emplace(signalRcvdAt[neighbor], neighbor);
                 }
             }
         }
     }
+
     int networkDelayTime(vector<vector<int>>& times, int n, int k) {
-        for(auto time: times) {
+
+        // Build adjacency list dynamically
+        vector<vector<pair<int,int>>> adj(n + 1);
+
+        for (auto& time : times) {
             int source = time[0];
             int dest = time[1];
             int travelTime = time[2];
             adj[source].emplace_back(travelTime, dest);
         }
-        vector<int> signalRcvdAt(n+1, INT_MAX);
-        dijkstra(signalRcvdAt, k, n);
-        int ans = INT_MIN;
+
+        vector<int> signalRcvdAt(n + 1, INT_MAX);
+
+        dijkstra(adj, signalRcvdAt, k);
+
+        int ans = 0;
         for (int i = 1; i <= n; i++) {
+            if (signalRcvdAt[i] == INT_MAX)
+                return -1;
             ans = max(ans, signalRcvdAt[i]);
         }
-        return ans == INT_MAX ? -1 : ans;
+
+        return ans;
     }
 };
