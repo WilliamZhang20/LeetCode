@@ -1,23 +1,21 @@
 class Solution {
-    void explore(vector<int>& candidates, int& target, vector<vector<int>>& ans, vector<int>& curr, int idx, int sum) {
-        if (sum == target) {
-            ans.push_back(curr);
-            return;
-        }
-        if(sum > target || idx == candidates.size()) {
-            return;
-        }
-        curr.push_back(candidates[idx]);
-        explore(candidates, target, ans, curr, idx, sum + candidates[idx]);
-        curr.pop_back();
-        explore(candidates, target, ans, curr, idx+1, sum);
-    }
+    vector<vector<int>> result;
+    vector<int> path;
 public:
+    void dfs(int start, int remaind, vector<int>& candidates) {
+        if(remaind == 0) {
+            result.push_back(path);
+            return;
+        }
+        if(remaind < 0) return;
+        for(int i=start; i<candidates.size(); i++) {
+            path.push_back(candidates[i]);
+            dfs(i, remaind - candidates[i], candidates);
+            path.pop_back();
+        }
+    }
     vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
-        vector<vector<int>> ans;
-        vector<int> curr;
-        sort(candidates.begin(), candidates.end());
-        explore(candidates, target, ans, curr, 0, 0);
-        return ans;
+        dfs(0, target, candidates);
+        return result;
     }
 };
