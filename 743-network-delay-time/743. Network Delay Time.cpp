@@ -1,40 +1,40 @@
 class Solution {
-int INF = 10000;
+    vector<pair<int, int>> adj[101];
 public:
-    int networkDelayTime(vector<vector<int>>& times, int n, int k) {
-        map<int, vector<pair<int, int>>> graph;
-        vector<int> dist(n+1, INF);
-        for(int i=0; i<times.size(); i++) {
-            graph[times[i][0]].push_back({times[i][1], times[i][2]});
-        }
-        dist[k] = 0;
-        queue<int> q;
-        q.push(k);
-        while(!q.empty()) {
-            int curr = q.front();
-            q.pop();
-            for(int i=0; i<graph[curr].size(); i++) {
-                if(dist[curr] + graph[curr][i].second < dist[graph[curr][i].first]) {
-                    dist[graph[curr][i].first] = dist[curr] + graph[curr][i].second;
-                    q.push(graph[curr][i].first);
+    void dijkstra(vector<int>& signalRcvdAt, int source, int n) {
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+        pq.emplace(0, source);
+        signalRcvdAt[source] = 0;
+        while(!pq.empty()) {
+            int currNodetime = pq.top().first;
+            int currNode = pq.top().second;
+            pq.pop();
+            if(currNodetime > signalRcvdAt[currNode]) {
+                continue;
+            }
+            for(auto& edge: adj[currNode]) {
+                int time = edge.first;
+                int neighborNode = edge.second;
+                if(signalRcvdAt[neighborNode] > currNodetime + time) {
+                    signalRcvdAt[neighborNode] = currNodetime + time;
+                    pq.emplace(signalRcvdAt[neighborNode], neighborNode);
                 }
             }
         }
-        int count = 0;
-        int time = 0;
-        for(int i=1; i<=n; i++) {
-            if(dist[i] == INF) {
-                continue;
-            }
-            else if(i != k) {
-                cout << i << " " << dist[i] << endl;
-                time = max(time, dist[i]);
-            }
-            count++;
+    }
+    int networkDelayTime(vector<vector<int>>& times, int n, int k) {
+        for(auto time: times) {
+            int source = time[0];
+            int dest = time[1];
+            int travelTime = time[2];
+            adj[source].emplace_back(travelTime, dest);
         }
-        if(count == n) {
-            return time;
+        vector<int> signalRcvdAt(n+1, INT_MAX);
+        dijkstra(signalRcvdAt, k, n);
+        int ans = INT_MIN;
+        for (int i = 1; i <= n; i++) {
+            ans = max(ans, signalRcvdAt[i]);
         }
-        return -1;
+        return ans == INT_MAX ? -1 : ans;
     }
 };
