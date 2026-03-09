@@ -24,20 +24,19 @@ public:
     void remove(int videoId) {
         if (!stats.contains(videoId)) return;
         stats.erase(videoId);
+        ids.erase(videoId);
         used.push(videoId);
     }
     
     string watch(int videoId, int startMinute, int endMinute) {
-        auto it = stats.find(videoId);
-        if (it == stats.end()) return "-1";
-
-        it->second[0] += 1;
+        if (!stats.contains(videoId)) return "-1";
+        stats[videoId][0] += 1;
         return ids[videoId].substr(startMinute, endMinute - startMinute + 1);
     }
     
     void like(int videoId) {
-        auto it = stats.find(videoId);
-        if (it != stats.end()) stats[videoId][1] += 1;
+        if (!stats.contains(videoId)) return;
+        stats[videoId][1] += 1;
     }
     
     void dislike(int videoId) {
