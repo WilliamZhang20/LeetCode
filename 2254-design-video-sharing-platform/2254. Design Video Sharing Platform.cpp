@@ -1,57 +1,71 @@
 class VideoSharingPlatform {
-    priority_queue<int, vector<int>, greater<>> used;
-    int curId = 0;
-    unordered_map<int, vector<int>> stats;
-    unordered_map<int, string> ids;
+    struct Video {
+        string content;
+        int views = 0;
+        int likes = 0;
+        int dislikes = 0;
+    };
+
+    priority_queue<int, vector<int>, greater<int>> available;
+    unordered_map<int, Video> videos;
+    int nextId = 0;
+
 public:
     VideoSharingPlatform() {
+        videos.reserve(100000);
     }
     
     int upload(string video) {
-        int videoId;
-        if(!used.empty()) {
-            videoId = used.top();
-            used.pop();
+        int id;
+        if (!available.empty()) {
+            id = available.top();
+            available.pop();
+        } else {
+            id = nextId++;
         }
-        else {
-            videoId = curId++;
-        }
-        stats[videoId].assign(4, 0);
-        ids[videoId] = video;
-        return videoId;
+
+        videos[id] = {video, 0, 0, 0};
+        return id;
     }
     
     void remove(int videoId) {
-        if (!stats.contains(videoId)) return;
-        stats.erase(videoId);
-        ids.erase(videoId);
-        used.push(videoId);
+        auto it = videos.find(videoId);
+        if (it == videos.end()) return;
+
+        videos.erase(it);
+        available.push(videoId);
     }
     
     string watch(int videoId, int startMinute, int endMinute) {
-        if (!stats.contains(videoId)) return "-1";
-        stats[videoId][0] += 1;
-        return ids[videoId].substr(startMinute, endMinute - startMinute + 1);
+        auto it = videos.find(videoId);
+        if (it == videos.end()) return "-1";
+
+        it->second.views++;
+        return it->second.content.substr(startMinute, endMinute - startMinute + 1);
     }
     
     void like(int videoId) {
-        if (!stats.contains(videoId)) return;
-        stats[videoId][1] += 1;
+        auto it = videos.find(videoId);
+        if (it != videos.end()) it->second.likes++;
     }
     
     void dislike(int videoId) {
-        if (!stats.contains(videoId)) return;
-        stats[videoId][2] += 1;
+        auto it = videos.find(videoId);
+        if (it != videos.end()) it->second.dislikes++;
     }
     
     vector<int> getLikesAndDislikes(int videoId) {
-        if (!stats.contains(videoId)) return {-1};
-        return {stats[videoId][1], stats[videoId][2]};
+        auto it = videos.find(videoId);
+        if (it == videos.end()) return {-1};
+
+        return {it->second.likes, it->second.dislikes};
     }
     
     int getViews(int videoId) {
-        if (!stats.contains(videoId)) return -1;
-        return stats[videoId][0];
+        auto it = videos.find(videoId);
+        if (it == videos.end()) return -1;
+
+        return it->second.views;
     }
 };
 
