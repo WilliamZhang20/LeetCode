@@ -1,45 +1,45 @@
 class Solution {
-    int SENTINEL = 1e6;
-
     vector<vector<int>> graph;
-    map<int, int> rank;
-    map<pair<int, int>, bool> conn;
+    vector<int> disc; // Discovery time of each node
+    vector<int> low;  // Lowest discovery time reachable via back-edge
+    vector<vector<int>> bridges;
+    int timer;
+
 public:
-    int dfs(int node, int discoveryRank) {
-        if(rank[node] != SENTINEL) {
-            return rank[node];
-        }
-        int minRank = discoveryRank+1;
-        rank[node] = discoveryRank;
-        for(auto& neighbor: graph[node]) {
-            if(rank[neighbor] == discoveryRank-1) continue;
-            int recurRank = dfs(neighbor, discoveryRank+1);
-            if(recurRank <= discoveryRank) {
-                int u = min(node, neighbor);
-                int v = max(node, neighbor);
-                conn[{u, v}] = false;
+    void dfs(int u, int p) {
+        disc[u] = low[u] = ++timer;
+        
+        for (int v : graph[u]) {
+            if (v == p) continue; // Don't go back to parent
+            
+            if (disc[v] == 0) { // If v is not visited
+                dfs(v, u);
+                low[u] = min(low[u], low[v]);
+                
+                // If the lowest vertex reachable from v is still deeper than u, 
+                // then u-v is a bridge.
+                if (low[v] > disc[u]) {
+                    bridges.push_back({u, v});
+                }
+            } else {
+                // Update low value of u for back-edge
+                low[u] = min(low[u], disc[v]);
             }
-            minRank = min(minRank, recurRank);
         }
-        return minRank;
     }
+
     vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {
-        graph.resize(n);
-        for(int i=0; i<n; i++) {
-            rank[i] = SENTINEL;
+        graph.assign(n, vector<int>());
+        disc.assign(n, 0);
+        low.assign(n, 0);
+        timer = 0;
+
+        for (const auto& edge : connections) {
+            graph[edge[0]].push_back(edge[1]);
+            graph[edge[1]].push_back(edge[0]);
         }
-        for(auto& c: connections) {
-            graph[c[0]].push_back(c[1]);
-            graph[c[1]].push_back(c[0]);
-            int u = min(c[0], c[1]);
-            int v = max(c[0], c[1]);
-            conn[{u, v}] = true;
-        }
-        dfs(0, 0);
-        vector<vector<int>> res;
-        for(auto& [k, v] : conn) {
-            if(v) res.push_back(vector<int>{k.first, k.second});
-        }
-        return res;
+
+        dfs(0, -1);
+        return bridges;
     }
 };
