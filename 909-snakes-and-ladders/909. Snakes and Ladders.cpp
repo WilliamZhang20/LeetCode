@@ -12,7 +12,6 @@ public:
             // convert from cell value to i, j: [n, x / n]
             int val = q.front();
             q.pop();
-            cout << val << endl;
             if(vis[val]) continue;
             vis[val] = true;
             for(int x=1; x<=6; x++) {
@@ -22,7 +21,6 @@ public:
                 if (r % 2 == 1) c = n - 1 - c;
                 r = n - 1 - r;
                 if(board[r][c] != -1) {
-                    cout << "skipping to " << board[r][c] << endl;
                     q.push(board[r][c]);
                     dist[board[r][c]] = min(dist[board[r][c]], dist[val] + 1);
                 } else if(!vis[val + x]) {
