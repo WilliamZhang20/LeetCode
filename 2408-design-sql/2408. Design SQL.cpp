@@ -1,7 +1,7 @@
 class SQL {
     unordered_map<string, int> ids; // auto incr
     unordered_map<string, int> numCols;
-    unordered_map<string, map<int, vector<string>>> data;
+    unordered_map<string, unordered_map<int, vector<string>>> data;
 
 public:
     SQL(vector<string>& names, vector<int>& columns) {
@@ -35,23 +35,23 @@ public:
         return row[columnId - 1];
     }
     
-   vector<string> exp(string name) {
-    vector<string> res;
+    vector<string> exp(string name) {
+        vector<string> res;
 
-    if(!numCols.count(name)) return res;
+        if(!numCols.count(name)) return res;
 
-    for(auto &[rowId, row] : data[name]) {
-        string s = to_string(rowId);
+        for(auto &[rowId, row] : data[name]) {
+            string s = to_string(rowId);
 
-        for(auto &v : row) {
-            s += "," + v;
+            for(auto &v : row) {
+                s += "," + v;
+            }
+
+            res.push_back(s);
         }
 
-        res.push_back(s);
+        return res;
     }
-
-    return res;
-}
 };
 
 /**
