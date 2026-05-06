@@ -10,7 +10,6 @@ public:
             for(int i=0; i<piles.size(); i++) {
                 time += (piles[i] + k - 1) / k;
             }
-            cout << time << endl;
             if(time > h) {
                 l = k + 1;
             } else {
