@@ -1,0 +1,27 @@
+class Solution {
+public:
+    bool isBipartite(vector<vector<int>>& graph) {
+        // BFS approach
+        int n = graph.size();
+        vector<int> color(n, -1);
+        for(int k=0; k<n; k++) {
+            if(color[k] != -1) continue;
+            queue<int> q;
+            color[k] = 0;
+            q.push(k);
+            while(!q.empty()) {
+                int cur = q.front();
+                q.pop();
+                for(int i=0; i<graph[cur].size(); i++) {
+                    if(color[graph[cur][i]] == -1) {
+                        color[graph[cur][i]] = 1 - color[cur];
+                        q.push(graph[cur][i]);
+                    } else if(color[graph[cur][i]] == color[cur]) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+};
