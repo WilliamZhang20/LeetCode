@@ -1,24 +1,28 @@
 class Solution {
 public:
     int largestRectangleArea(vector<int>& heights) {
-        stack<int> s;
-        s.push(-1);
-        int max_area = 0;
-        for(size_t i = 0; i<heights.size(); i++) {
-            while(s.top() != -1 && heights[s.top()] >= heights[i]) {
-                int current_height = heights[s.top()];
-                s.pop();
-                int current_width = i - s.top() - 1;
-                max_area = max(max_area, current_height * current_width);
-            }
-            s.push(i);
+        int n = heights.size();
+        // build previous smaller element and next smaller element via stack
+        vector<int> pse(n), nse(n); // both contain indices
+        stack<int> st; // monotonic stack to track increasing/decreasing
+        for(int i=0; i<n; i++) {
+            while(!st.empty() && heights[st.top()] >= heights[i]) st.pop();
+            if(st.empty()) pse[i] = -1;
+            else pse[i] = st.top();
+            st.push(i);
         }
-        while(s.top() != -1) {
-            int curr_height = heights[s.top()];
-            s.pop();
-            int curr_width = heights.size() - s.top() - 1;
-            max_area = max(max_area, curr_height * curr_width);
+        st = std::stack<int>();
+        for(int i=heights.size()-1; i>=0; i--) { 
+            while(!st.empty() && heights[st.top()] >= heights[i]) st.pop();
+            if(st.empty()) nse[i] = n;
+            else nse[i] = st.top();
+            st.push(i);
         }
-        return max_area;
+        int ans = 0;
+        // use previous smaller element and next smaller element
+        for(int i=0; i<n; i++) {
+            ans = max(ans, heights[i] * (nse[i] - pse[i] - 1));
+        }
+        return ans;
     }
 };
