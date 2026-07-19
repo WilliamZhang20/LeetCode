@@ -1,53 +1,43 @@
 class DSU {
-private:
-    int N;
-    vector<int> size;
-    vector<int> representative;
 public:
-    DSU(int n) {
-        this->N = n;
-
-        for(int node=0; node<N; node++) {
-            size.push_back(1);
-            representative.push_back(node);
+    vector<int> size;
+    vector<int> rep;
+    DSU(int sz) {
+        size.resize(sz+1, 1);
+        rep.resize(sz+1);
+        for(int i=0; i<=sz; i++) {
+            rep[i] = i;
         }
     }
-
-    int find(int node) {
-        if(representative[node] == node) {
-            return node;
+    int find(int i) {
+        if(rep[i] == i) {
+            return i;
         }
-        return representative[node] = find(representative[node]);
+        return rep[i] = find(rep[i]);
     }
 
-    bool doUnion(int node1, int node2) {
-        node1 = find(node1);
-        node2 = find(node2);
-        if(node1 == node2) {
-            return false;
+    bool doUnion(int i, int j) {
+        int a = find(i);
+        int b = find(j);
+        if(a == b) return false;
+        if(size[a] < size[b]) {
+            swap(a, b);
         }
-        if(size[node1] > size[node2]) {
-            representative[node2] = node1;
-            size[node1] += size[node2];
-        } else {
-            representative[node1] = node2;
-            size[node2] += size[node1];
-        }
+        rep[b] = a;
+        size[a] += size[b];
         return true;
     }
 };
-
 class Solution {
 public:
     vector<int> findRedundantConnection(vector<vector<int>>& edges) {
-        int N = edges.size();
-        DSU dsu(N);
-        for(auto edge : edges) {
-            if(!dsu.doUnion(edge[0] - 1, edge[1] - 1)) {
+        DSU graph(edges.size());
+        for(auto& edge: edges) {
+            // do union from those
+            if(!graph.doUnion(edge[0], edge[1])) {
                 return edge;
             }
         }
-
         return {};
     }
 };
