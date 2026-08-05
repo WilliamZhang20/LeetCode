@@ -1,7 +1,7 @@
 class RandomizedSet {
     unordered_map<int, int> idx; 
     vector<int> v;
-    std::random_device rd;
+    std::mt19937 gen;
 public:
     RandomizedSet() {
     }
@@ -24,10 +24,8 @@ public:
     }
     
     int getRandom() {
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<int> distrib(0, v.size()-1);
-        int idx = distrib(gen);
-        return v[idx];
+        std::uniform_int_distribution<int> dist(0, v.size() - 1);
+        return v[dist(gen)];
     }
 };
 
