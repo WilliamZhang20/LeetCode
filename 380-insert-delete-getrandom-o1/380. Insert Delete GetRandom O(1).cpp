@@ -1,5 +1,5 @@
 class RandomizedSet {
-    map<int, int> idx; // value -> position (1-based)
+    unordered_map<int, int> idx; // value -> position (1-based)
     vector<int> v;
     std::mt19937 gen;
 
